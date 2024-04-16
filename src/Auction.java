@@ -17,6 +17,14 @@ public class Auction {
         updateInitialBid();
     }
 
+    public int getCurrentBid() {
+        return currentBid;
+    }
+
+    public int getCurrentLeaderId() {
+        return currentLeaderId;
+    }
+
     public void simulateAuction() {
         currentBid = 550;
         currentLeaderId = 2;
