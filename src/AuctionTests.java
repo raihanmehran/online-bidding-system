@@ -8,8 +8,8 @@ public class AuctionTests {
     @BeforeEach
     void setUp() {
         auction = new Auction(500);
-        auction.addBidder(new Bidder(1, 500));
-        auction.addBidder(new Bidder(2, 700));
+        auction.addBidder(new Bidder(1,"Nick", 500, 2, true));
+        auction.addBidder(new Bidder(2, "Someone",700, 3, true));
     }
 
     @Test

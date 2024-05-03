@@ -5,11 +5,11 @@ public class Auction {
     private int currentBid;
     private int currentLeaderId;
     private List<Bidder> bidders = new ArrayList<>();
-    // incrementing amount for each new bed
     private final int incrementStep = 50;
 
     public Auction(int startingBid) {
         this.currentBid = startingBid;
+        System.out.println("Auction house starts at: " + this.currentBid + " Kr");
     }
 
     public void addBidder(Bidder bidder) {
@@ -26,77 +26,66 @@ public class Auction {
     }
 
     public void simulateAuction() {
-        currentBid = 550;
-        currentLeaderId = 2;
-        System.out.println("Auction house bids for "+ currentLeaderId +" with bid amount: " + currentBid + " Kr");
-
-        placeLiveBid(3, 600);
-        placeLiveBid(2, 650);
-        placeLiveBid(3, 700);
-        placeLiveBid(2, 700);
-        placeLiveBid(3, 750);
+        placeLiveBid(3, 600); // true
+        placeLiveBid(1, 800); // true
+        placeLiveBid(2, 650); // false
+        placeLiveBid(3, 700); // false
+        placeLiveBid(2, 700); // false
+        placeLiveBid(4, 820); // truee
+        placeLiveBid(3, 750); // false
+        placeLiveBid(2, 800); // false
+        placeLiveBid(3, 1100); // false because of limit
+        placeLiveBid(1, 1200); // truee
+        placeLiveBid(4, 20000); // truee and winner!
     }
 
     // Updating initial bid based on commission bids
     private void updateInitialBid() {
+        int initialCommissionBid = 0;
         for (Bidder bidder : bidders) {
-            if (bidder.getMaxBid() >= currentBid + incrementStep) {
-                currentBid += incrementStep;
-                currentLeaderId = bidder.getId();
+            if ((bidder.isVerifiedByReference() || bidder.getReputation() >= 2) && bidder.getMaxBid() > initialCommissionBid) {
+                initialCommissionBid = Math.min(bidder.getMaxBid(), initialCommissionBid + incrementStep);
             }
+        }
+        if (initialCommissionBid > currentBid) {
+            currentBid = initialCommissionBid;
+            currentLeaderId = getHighestCommissionBidder().getId();
         }
     }
-
-    // Placing bid during live auction
-   /*public void placeLiveBid(int bidderId, int bidAmount) {
-        if (bidAmount > currentBid) {
-            if (bidAmount >= getMaxCommissionBid() && bidAmount > currentBid) {
-                currentBid = bidAmount;
-                currentLeaderId = bidderId;
-            } else {
-                // Adjusting bid to the maximum commission bid
-                currentBid = Math.max(currentBid + incrementStep, getMaxCommissionBid());
-                currentLeaderId = getHighestCommissionBidder().getId();
-            }
-        }
-    }*/
-    /*public void placeLiveBid(int bidderId, int bidAmount) {
-        if (bidAmount > currentBid) {
-            currentBid = bidAmount;
-            currentLeaderId = bidderId;
-            System.out.println((bidderId == 3 ? "C" : "Auction house") + " bids " + bidAmount + " Kr");
-        }
-    }*/
 
     public void placeLiveBid(int bidderId, int bidAmount) {
-        if (bidAmount > currentBid) {
-            currentBid = bidAmount;
-            currentLeaderId = bidderId;
-            System.out.println("Bidder #" + bidderId + " bids " + bidAmount + " Kr");
+        Bidder bidder = bidders.stream().filter(b -> b.getId() == bidderId).findFirst().orElse(null);
+        if (bidder != null && bidAmount > (currentBid + incrementStep - 1) && bidAmount <= bidder.getMaxBid()) {
+            // Check if the bid is a valid increment over the current bid
+            if (bidAmount > currentBid + incrementStep - 1) {
+                currentBid = bidAmount;
+                currentLeaderId = bidderId;
+                System.out.println("Bidder #" + bidderId + " bids " + bidAmount + " Kr");
+            }
+        } else if (bidder != null && bidder.getReputation() >= 3) {
+            // High reputation bidders can ignore the max bid constraint
+            if (bidAmount > currentBid + incrementStep - 1) {
+                currentBid = bidAmount;
+                currentLeaderId = bidderId;
+                System.out.println("Bidder #" + bidderId + " (trusted) bids " + bidAmount + " Kr");
+            }
         }
     }
 
-    private int getMaxCommissionBid() {
-        int maxBid = 0;
-        for (Bidder bidder : bidders) {
-            if (bidder.getMaxBid() > maxBid) {
-                maxBid = bidder.getMaxBid();
-            }
-        }
-        return maxBid;
-    }
 
     private Bidder getHighestCommissionBidder() {
         Bidder maxBidder = null;
         for (Bidder bidder : bidders) {
-            if (maxBidder == null || bidder.getMaxBid() > maxBidder.getMaxBid()) {
-                maxBidder = bidder;
+            if (bidder.isVerifiedByReference() || bidder.getReputation() >= 2) {
+                if (maxBidder == null || bidder.getMaxBid() > maxBidder.getMaxBid()) {
+                    maxBidder = bidder;
+                }
             }
         }
         return maxBidder;
     }
 
     public void announceWinner() {
-        System.out.println("Going once... Going twice... Sold to bidder #" + currentLeaderId + " for " + currentBid + " Kr!");
+        System.out.println("Going once... Going twice... Sold to bidder #" + this.currentLeaderId + " for " + this.currentBid + " Kr!");
     }
 }
