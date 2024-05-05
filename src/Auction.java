@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Auction { //{Auction:Auction,Bidder}
     private int currentBid; //{Auction:Auction,Bidder}
-    private int currentLeaderId;
+    private int currentLeaderId; //{Auction:Auction,Bidder}
     private List<Bidder> bidders = new ArrayList<>();//{Auction:Auction}
     private final int incrementStep = 50;// {Auction:Auction}
 
