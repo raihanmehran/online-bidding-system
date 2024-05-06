@@ -7,7 +7,7 @@ public class Main {
         auction.addBidder(new Bidder(3,"Aarbhi", 1000,1, false)); // Live, new
         auction.addBidder(new Bidder(4,"Some guy", 0,4, false)); // Trusted  // maxBid is zero, because it's not considerable
 
-        auction.simulateAuction();
+        auction.simulateAuctionHouse();
 
         auction.announceWinner();
     }
